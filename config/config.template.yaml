@@ -1,0 +1,8 @@
+deploy:
+  save_path: /opt/basic
+  exec_file: basic
+  service_name: basic.service
+github:
+  owner: writethesky
+  repo: basic
+  token: xxx
