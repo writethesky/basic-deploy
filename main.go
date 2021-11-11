@@ -4,13 +4,13 @@ import (
 	"archive/zip"
 	"basic-deploy/github"
 	"basic-deploy/internal"
+	"basic-deploy/service"
 	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path"
 	"syscall"
@@ -39,13 +39,12 @@ func deploy() {
 }
 
 func deployRepo(deployEntity internal.DeployEntity) (err error) {
-	log.Println("deploying")
-
+	log.Println("get artifacts")
 	artifacts, err := getArtifacts(deployEntity.Owner, deployEntity.Repo)
 	if nil != err || len(artifacts) == 0 {
 		return
 	}
-
+	log.Println("deploying")
 	latestArtifact := artifacts[0]
 	err = removeOldArtifacts(deployEntity.Owner, deployEntity.Repo, artifacts)
 	if nil != err {
@@ -61,25 +60,33 @@ func deployRepo(deployEntity internal.DeployEntity) (err error) {
 	if nil != err {
 		return
 	}
-
-	fileMap := unzip(fileBytes)
-	if !execFileIsExist(fileMap, deployEntity.ExecFile) {
-		return errors.New("exec file not found")
-	}
-	for key, value := range fileMap {
-		err = saveFile(deployEntity.SavePath, key, 0777, value)
-		if nil == err {
-			return
-		}
+	err = saveArtifact(fileBytes, deployEntity.ExecFile, deployEntity.SavePath)
+	if nil != err {
+		return
 	}
 
-	err = reload(deployEntity.ServiceName)
+	err = service.Run(deployEntity.ServiceName, path.Join(deployEntity.SavePath, deployEntity.ExecFile))
 	if nil != err {
 		return
 	}
 
 	saveLatestDeployID(deployEntity, latestArtifact.ID)
 	log.Println("deployed")
+	return
+}
+
+func saveArtifact(fileBytes []byte, execFile, savePath string) (err error) {
+
+	fileMap := unzip(fileBytes)
+	if !execFileIsExist(fileMap, execFile) {
+		return errors.New("exec file not found")
+	}
+	for key, value := range fileMap {
+		err = saveFile(savePath, key, 0777, value)
+		if nil == err {
+			return
+		}
+	}
 	return
 }
 
@@ -116,15 +123,6 @@ func execFileIsExist(fileMap map[string][]byte, execFile string) bool {
 		}
 	}
 	return false
-}
-
-func reload(serviceName string) (err error) {
-	cmd := exec.Command("systemctl", "restart", serviceName)
-	err = cmd.Start()
-	if nil != err {
-		return
-	}
-	return cmd.Wait()
 }
 
 func getArtifacts(owner, repo string) (list []github.Artifact, err error) {

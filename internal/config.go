@@ -16,7 +16,7 @@ import (
 )
 
 type ConfigEntity struct {
-	Deploys []DeployEntity `yaml:"deploy"`
+	Deploys []DeployEntity `yaml:"deploys"`
 	Github  GithubEntity   `yaml:"github"`
 }
 
