@@ -15,24 +15,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type configEntity struct {
-	Deploy deployEntity `yaml:"deploy"`
-	Github githubEntity `yaml:"github"`
+type ConfigEntity struct {
+	Deploys []DeployEntity `yaml:"deploy"`
+	Github  GithubEntity   `yaml:"github"`
 }
 
-type deployEntity struct {
+type DeployEntity struct {
 	SavePath    string `yaml:"save_path"`
 	ExecFile    string `yaml:"exec_file"`
 	ServiceName string `yaml:"service_name"`
+	Owner       string `yaml:"owner"`
+	Repo        string `yaml:"repo"`
 }
 
-type githubEntity struct {
-	Owner string
-	Repo  string
-	Token string
+type GithubEntity struct {
+	Token string `yaml:"token"`
 }
 
-var Config *configEntity
+var Config *ConfigEntity
 
 const defaultConfigFileName = "config/config.yaml"
 
@@ -76,7 +76,7 @@ func init() {
 	if nil != err {
 		panic(err)
 	}
-	Config = new(configEntity)
+	Config = new(ConfigEntity)
 	err = yaml.Unmarshal(fileBytes, Config)
 	if nil != err {
 		panic(err)
