@@ -44,7 +44,7 @@ func deployRepo(deployEntity internal.DeployEntity) (err error) {
 	if nil != err || len(artifacts) == 0 {
 		return
 	}
-	log.Println("deploying")
+
 	latestArtifact := artifacts[0]
 	err = removeOldArtifacts(deployEntity.Owner, deployEntity.Repo, artifacts)
 	if nil != err {
@@ -54,6 +54,8 @@ func deployRepo(deployEntity internal.DeployEntity) (err error) {
 	if latestArtifact.ID == getLatestDeployID(deployEntity) {
 		return
 	}
+
+	log.Println("deploying")
 
 	log.Printf("ID: %d\nName: %s\nDownload URL: %s\n", latestArtifact.ID, latestArtifact.Name, latestArtifact.ArchiveDownloadURL)
 	fileBytes, err := github.DownloadArtifact(deployEntity.Owner, deployEntity.Repo, latestArtifact.ID)
@@ -112,6 +114,7 @@ func removeOldArtifacts(owner, repo string, artifacts []github.Artifact) (err er
 	if len(artifacts) <= 1 {
 		return
 	}
+	log.Println("remove old artifacts")
 	oldArtifacts := artifacts[1:]
 	return deleteArtifacts(owner, repo, oldArtifacts)
 }
