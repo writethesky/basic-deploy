@@ -33,13 +33,13 @@ func deploy() {
 	for _, deployEntity := range internal.Config.Deploys {
 		err := deployRepo(deployEntity)
 		if nil != err {
-			panic(err)
+			log.Println(err)
 		}
 	}
 }
 
 func deployRepo(deployEntity internal.DeployEntity) (err error) {
-	log.Println("get artifacts")
+	log.Printf("get artifacts by owner: %s and repo: %s", deployEntity.Owner, deployEntity.Repo)
 	artifacts, err := getArtifacts(deployEntity.Owner, deployEntity.Repo)
 	if nil != err || len(artifacts) == 0 {
 		return
@@ -131,6 +131,7 @@ func execFileIsExist(fileMap map[string][]byte, execFile string) bool {
 func getArtifacts(owner, repo string) (list []github.Artifact, err error) {
 	artifactResponse, err := github.GetArtifacts(owner, repo)
 	if nil != err {
+		err = fmt.Errorf("failed to get artifacts: %s", err.Error())
 		return
 	}
 
