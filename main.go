@@ -29,8 +29,11 @@ func main() {
 }
 
 func deploy() {
-	github.SetToken(internal.Config.Github.Token)
 	for _, deployEntity := range internal.Config.Deploys {
+		github.SetToken(internal.Config.Github.Token)
+		if "" != deployEntity.Github.Token {
+			github.SetToken(deployEntity.Github.Token)
+		}
 		err := deployRepo(deployEntity)
 		if nil != err {
 			log.Println(err)

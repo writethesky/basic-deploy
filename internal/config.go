@@ -21,11 +21,12 @@ type ConfigEntity struct {
 }
 
 type DeployEntity struct {
-	SavePath    string `yaml:"save_path"`
-	ExecFile    string `yaml:"exec_file"`
-	ServiceName string `yaml:"service_name"`
-	Owner       string `yaml:"owner"`
-	Repo        string `yaml:"repo"`
+	SavePath    string       `yaml:"save_path"`
+	ExecFile    string       `yaml:"exec_file"`
+	ServiceName string       `yaml:"service_name"`
+	Owner       string       `yaml:"owner"`
+	Repo        string       `yaml:"repo"`
+	Github      GithubEntity `yaml:"github"`
 }
 
 type GithubEntity struct {
